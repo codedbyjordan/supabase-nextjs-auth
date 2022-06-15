@@ -1,23 +1,32 @@
-# Next.js + Tailwind CSS Example
+# Supabase & Next.js Auth
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v3.0)](https://tailwindcss.com/blog/tailwindcss-v3) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
-
-## Deploy your own
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
+A template for getting up and running with Supabase's authentication and Next.js
 
 ## How to use
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
+Clone the repo and create a `.env` file with the following contents
 
-```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
-# or
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
-# or
-pnpm create next-app --example with-tailwindcss with-tailwindcss-app
+```
+NEXT_PUBLIC_SUPABASE_URL="<your supabase url>"
+NEXT_PUBLIC_SUPABASE_KEY="<your supabase anon key>"
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+Run `yarn dev` and go to `localhost:3000` in your browser
+
+## Creating private routes
+
+To create a page that is only accessible by visitors who are logged in, wrap a page in a `<ProtectedRoute>` and add `getServerSideProps`
+
+```ts
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const { user } = await supabase.auth.api.getUserByCookie(req);
+
+  if (!user) {
+    return { props: {}, redirect: { destination: "/login" } };
+  } else {
+    return { props: {} };
+  }
+};
+```
+
+The `<ProtectedRoute>` component is fine on its own, but adding this will ensure that the user can't visit unless authenticated, even if the user somehow tampered with the client state.
